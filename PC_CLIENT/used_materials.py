@@ -10,7 +10,7 @@ class Network_Extractor():
         ctx = ssl.create_default_context()
         ctx.check_hostname = False
         ctx.verify_mode = ssl.CERT_NONE
-        self.filename = 'song_names'
+        self.filename = 'song_names.txt'
         self.song_titles = {}
         self.__read_all_from_file()
     
@@ -33,24 +33,27 @@ class Network_Extractor():
             
     # Input from user
     def __get_name_from_url(self,id):
-        url = Global.url_prefix + id
-        # Making the website believe that you are accessing it using a mozilla browser
-        
-        req = Request(url, headers={'User-Agent': 'Chrome/79.0.3945.130'})
-        webpage = urlopen(req).read()
-        # Creating a BeautifulSoup object of the html page for easy extraction of data.
-        
-        soup = BeautifulSoup(webpage, 'html.parser')
-        html = soup.prettify('utf-8')
-        video_details = {}
-        
-        for span in soup.findAll('span',attrs={'class': 'watch-title'}):
-            video_details['TITLE'] = span.text.strip()
+        try:
+            url = Global.url_prefix + id
+            # Making the website believe that you are accessing it using a mozilla browser
             
-        self.song_titles[id]=video_details['TITLE']
-        self.__write_to_file(id,self.song_titles[id])
-        
-        return video_details['TITLE']
+            req = Request(url, headers={'User-Agent': 'Chrome/79.0.3945.130'})
+            webpage = urlopen(req).read()
+            # Creating a BeautifulSoup object of the html page for easy extraction of data.
+            
+            soup = BeautifulSoup(webpage, 'html.parser')
+            html = soup.prettify('utf-8')
+            video_details = {}
+            
+            for span in soup.findAll('span',attrs={'class': 'watch-title'}):
+                video_details['TITLE'] = span.text.strip()
+                
+            self.song_titles[id]=video_details['TITLE']
+            self.__write_to_file(id,self.song_titles[id])
+            
+            return video_details['TITLE']
+        except:
+            return id
     
     def _decode_id_string(self,ids_string):
         playlist = []
