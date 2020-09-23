@@ -6,11 +6,18 @@ from tkinter import *
 class GUI_Client():
     def __init__(self,extractor):
         self.__extractor = extractor
-        self.host = input('IP:')
+        self.host = self.__get_ip()
         self.tcpClient = None
         self.MESSAGE = ''
         self.playlist = []
         self.song_entry = 'plm'
+
+    def __get_ip(self):
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        IP = s.getsockname()[0]
+        s.close()
+        return IP
     
     def __connect(self):
         self.tcpClient = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
@@ -25,11 +32,9 @@ class GUI_Client():
     def __feedback(self):
         data = self.tcpClient.recv(Global.BUFFER_SIZE).decode()
         confirmation,ids = data.split(Global.feedback_binding_char)
+        print(ids)
         print (" Client1 received data:", confirmation)
-        try:
-            self.playlist = self.__extractor._decode_id_string(ids)
-        except:
-            self.playlist = []
+        self.playlist = self.__extractor._decode_id_string(ids)
         print(self.playlist)
     
     def __interact_with_server(self):
